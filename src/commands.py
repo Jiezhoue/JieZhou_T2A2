@@ -3,6 +3,7 @@ from flask import Blueprint
 from models.users import User
 from models.dentists import Dentist
 from main import bcrypt
+from models.bookings import Booking
 
 
 db_command = Blueprint('db', __name__)
@@ -70,6 +71,34 @@ def seed():
     dentist3.speciality = 'General'
 
     db.session.add(dentist3)
+    db.session.commit()
+
+    dentist4 = Dentist()
+    dentist4.f_name = 'Jenny'
+    dentist4.l_name = 'Hong'
+    dentist4.username = 'jennyhong'
+    dentist4.password = bcrypt.generate_password_hash('12345678').decode('utf-8')
+    dentist4.speciality = 'Cosmetic'
+
+    db.session.add(dentist4)
+    db.session.commit()
+
+    booking1 = Booking()
+    booking1.date = "2023-02-05"
+    booking1.time = "14:30:00"
+    booking1.user_id = 2
+    booking1.dentist_id = 1
+
+    db.session.add(booking1)
+    db.session.commit()
+
+    booking2 = Booking()
+    booking2.date = "2023-05-23"
+    booking2.time = "08:15:00"
+    booking2.user = user1
+    booking2.dentist = dentist1
+
+    db.session.add(booking2)
     db.session.commit()
 
     print("Table Seeded!")

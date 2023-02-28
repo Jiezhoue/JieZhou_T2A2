@@ -10,5 +10,8 @@ class User(db.Model):
     mobile = db.Column(db.String())
     admin = db.Column(db.Boolean(), default=False)
 
-
-
+    booking = db.relationship(
+        "Booking",
+        backref="user",
+        cascade="all, delete"
+    )

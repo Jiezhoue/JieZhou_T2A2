@@ -8,3 +8,9 @@ class Dentist(db.Model):
     username = db.Column(db.String(), nullable=False, unique=True)
     password = db.Column(db.String(), nullable=False)
     speciality = db.Column(db.String())
+
+    booking = db.relationship(
+        "Booking",
+        backref="dentist",
+        cascade="all, delete"
+    )
