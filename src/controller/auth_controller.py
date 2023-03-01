@@ -26,7 +26,7 @@ def user_login():
         access_token = create_access_token(identity=str(user.username))
         return jsonify({"user": user.username, "token": access_token})
     except ValidationError:
-        return abort(401, description="too short")
+        return abort(401, description="minimun password length is 8")
 
 
 
