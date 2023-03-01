@@ -105,6 +105,10 @@ def book_treatment(id):
 
     if not dentist:
         return abort(400, description="dentist not exist")
+    
+    exist = Booking.query.filter_by(status="Open").first()
+    if exist:
+        return abort(400, description="Before booking a new one, please ensure to cancel any existing booking in the system.")
 
     data = Booking.query.filter_by(dentist_id=id, date=booking_fields["date"])
 
@@ -122,6 +126,8 @@ def book_treatment(id):
     booking = Booking()
     booking.date = booking_fields["date"]
     booking.time = booking_fields["time"]
+    if "status" in booking_fields:
+        booking.status = booking_fields["status"]
     booking.user_id = user.id
     booking.dentist_id = id
     db.session.add(booking)
