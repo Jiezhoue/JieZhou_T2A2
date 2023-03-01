@@ -11,6 +11,7 @@ from models.users import User
 
 from models.bookings import Booking
 from schema.booking_schema import booking_schema, bookings_schema
+from datetime import datetime
 
 
 dentist = Blueprint('dentist', __name__, url_prefix="/dentists")
@@ -68,6 +69,28 @@ def dentist_signup():
     return jsonify({"user": dentist.username, "token":access_token})
 
 
+# @dentist.post("/<int:id>/booking")
+# @jwt_required()
+# def book_treatment(id):
+#     user_name = get_jwt_identity()
+#     user = User.query.filter_by(username=user_name).first()
+#     if not user:
+#         return abort(401, description="Invaild user")
+    
+#     # booking_records = Booking.query.filter_by(dentist_id=id)
+    
+#     booking_fields = booking_schema.load(request.json)
+#     booking = Booking()
+#     booking.date = booking_fields["date"]
+#     booking.time = booking_fields["time"]
+#     booking.user_id = user.id
+#     booking.dentist_id = id
+#     db.session.add(booking)
+#     db.session.commit()
+
+#     return jsonify(booking_schema.dump(booking))
+
+
 @dentist.post("/<int:id>/booking")
 @jwt_required()
 def book_treatment(id):
@@ -77,6 +100,19 @@ def book_treatment(id):
         return abort(401, description="Invaild user")
     
     booking_fields = booking_schema.load(request.json)
+
+    data = Booking.query.filter_by(dentist_id=id, date=booking_fields["date"])
+
+    for book in data:
+        t1 = datetime.strptime(str(book.time), '%H:%M:%S')
+        print(t1)
+        t2 = datetime.strptime(booking_fields["time"], '%H:%M:%S')
+        print(t2)
+        delta = t1 - t2
+        sec = delta.total_seconds()
+        if abs(sec) < 1800:
+            return abort(400, description="time not avaliable")
+
     booking = Booking()
     booking.date = booking_fields["date"]
     booking.time = booking_fields["time"]
@@ -84,5 +120,7 @@ def book_treatment(id):
     booking.dentist_id = id
     db.session.add(booking)
     db.session.commit()
+
+
 
     return jsonify(booking_schema.dump(booking))
