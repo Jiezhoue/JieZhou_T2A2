@@ -101,7 +101,13 @@ def book_treatment(id):
     
     booking_fields = booking_schema.load(request.json)
 
+    dentist = Dentist.query.filter_by(id=id).first()
+
+    if not dentist:
+        return abort(400, description="dentist not exist")
+
     data = Booking.query.filter_by(dentist_id=id, date=booking_fields["date"])
+
 
     for book in data:
         t1 = datetime.strptime(str(book.time), '%H:%M:%S')

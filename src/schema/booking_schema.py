@@ -5,7 +5,7 @@ class BookingSchema(ma.Schema):
   class Meta:
     ordered= True
 
-    fields = ("id", "date", "time", "user_id", "dentist_id")
+    fields = ("id", "date", "time", "status", "user_id", "dentist_id")
 
 
 

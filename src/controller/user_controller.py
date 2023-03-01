@@ -5,6 +5,8 @@ from schema.user_schema import user_schema, users_schema
 from main import bcrypt
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.bookings import Booking
+from schema.booking_schema import booking_schema, bookings_schema
 
 
 
@@ -21,6 +23,23 @@ def patient_info():
     result = user_schema.dump(user)
     return jsonify(result)
 
+
+@patient.delete("/cancel")
+@jwt_required()
+def cancel_booking():
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    
+    booking = Booking.query.filter_by(user_id=user.id, status="Open").first()
+    if not booking:
+        return abort(400, description="no booking in the system")
+    db.session.delete(booking)
+    db.session.commit()
+
+    return jsonify(booking_schema.dump(booking))
+    
 
 
 
