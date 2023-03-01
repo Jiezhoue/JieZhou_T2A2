@@ -9,6 +9,9 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.users import User
 
+from models.bookings import Booking
+from schema.booking_schema import booking_schema, bookings_schema
+
 
 dentist = Blueprint('dentist', __name__, url_prefix="/dentists")
 
@@ -65,3 +68,21 @@ def dentist_signup():
     return jsonify({"user": dentist.username, "token":access_token})
 
 
+@dentist.post("/<int:id>/booking")
+@jwt_required()
+def book_treatment(id):
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    
+    booking_fields = booking_schema.load(request.json)
+    booking = Booking()
+    booking.date = booking_fields["date"]
+    booking.time = booking_fields["time"]
+    booking.user_id = user.id
+    booking.dentist_id = id
+    db.session.add(booking)
+    db.session.commit()
+
+    return jsonify(booking_schema.dump(booking))

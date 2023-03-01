@@ -7,6 +7,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
+
 patient = Blueprint('patient', __name__, url_prefix='/patient')
 
 @patient.get("/info")
@@ -20,8 +21,7 @@ def patient_info():
     result = user_schema.dump(user)
     return jsonify(result)
 
-@patient.post("/booking")
-@jwt_required()
+
 
 
 
