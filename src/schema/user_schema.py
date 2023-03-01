@@ -9,7 +9,7 @@ class UserSchema(ma.Schema):
         ordered= True
 
         fields = ("id", "f_name", "l_name", "username", "password", "mobile", "admin", "booking")
-        load_only = ["username", "password", "admin"]
+        # load_only = ["username", "password", "admin"]
     password = ma.String(validate=Length(min=8))
     booking = ma.List(ma.Nested("BookingSchema", exclude=("id", "user_id",)))
 
