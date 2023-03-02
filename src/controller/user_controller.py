@@ -7,6 +7,8 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.bookings import Booking
 from schema.booking_schema import booking_schema, bookings_schema
+from models.treatments import Treatment
+from schema.treatment_schema import treatment_schema, treatments_schema
 
 
 
@@ -42,10 +44,18 @@ def cancel_booking():
     
 
 
+@patient.get("/treatment")
+def treatment():
+    treatment = Treatment.query.all()
+
+    return jsonify(treatments_schema.dump(treatment))
 
 
+@patient.get("/bookings")
+def bookings():
+    bookings = Booking.query.all()
 
-
+    return jsonify(bookings_schema.dump(bookings))
 
     
 

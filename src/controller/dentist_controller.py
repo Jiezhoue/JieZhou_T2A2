@@ -13,6 +13,9 @@ from models.bookings import Booking
 from schema.booking_schema import booking_schema, bookings_schema
 from datetime import datetime
 
+from models.treatments import Treatment
+from schema.treatment_schema import treatment_schema, treatments_schema
+
 
 dentist = Blueprint('dentist', __name__, url_prefix="/dentists")
 
@@ -69,28 +72,6 @@ def dentist_signup():
     return jsonify({"user": dentist.username, "token":access_token})
 
 
-# @dentist.post("/<int:id>/booking")
-# @jwt_required()
-# def book_treatment(id):
-#     user_name = get_jwt_identity()
-#     user = User.query.filter_by(username=user_name).first()
-#     if not user:
-#         return abort(401, description="Invaild user")
-    
-#     # booking_records = Booking.query.filter_by(dentist_id=id)
-    
-#     booking_fields = booking_schema.load(request.json)
-#     booking = Booking()
-#     booking.date = booking_fields["date"]
-#     booking.time = booking_fields["time"]
-#     booking.user_id = user.id
-#     booking.dentist_id = id
-#     db.session.add(booking)
-#     db.session.commit()
-
-#     return jsonify(booking_schema.dump(booking))
-
-
 @dentist.post("/<int:id>/booking")
 @jwt_required()
 def book_treatment(id):
@@ -106,7 +87,7 @@ def book_treatment(id):
     if not dentist:
         return abort(400, description="dentist not exist")
     
-    exist = Booking.query.filter_by(status="Open").first()
+    exist = Booking.query.filter_by(user_id=user.id, status="Open").first()
     if exist:
         return abort(400, description="Before booking a new one, please ensure to cancel any existing booking in the system.")
 
@@ -133,6 +114,54 @@ def book_treatment(id):
     db.session.add(booking)
     db.session.commit()
 
+    return jsonify(booking_schema.dump(booking))
 
+
+@dentist.put("/<int:id>/close")
+@jwt_required()
+def close_booking(id):
+    dentist_name = get_jwt_identity()
+    dentist = Dentist.query.filter_by(username=dentist_name).first()
+    if not dentist:
+        return abort(400, description="Invalid dentist account")
+    
+    booking = Booking.query.filter_by(id=id).first()
+    if not booking:
+        return abort(400, description="booking not exist")
+    if booking.dentist_id != dentist.id:
+        return abort(400, description="That's not your patient")
+    
+
+    booking.status = "Close"
+
+    db.session.add(booking)
+    db.session.commit()
 
     return jsonify(booking_schema.dump(booking))
+
+
+@dentist.post("/<int:id>/add")
+@jwt_required()
+def add_treatment(id):
+    dentist_name = get_jwt_identity()
+    dentist = Dentist.query.filter_by(username=dentist_name).first()
+    if not dentist:
+        return abort(400, description="Invalid dentist account")
+    
+    booking = Booking.query.filter_by(id=id).first()
+    if not booking:
+        return abort(400, description="booking not exist")
+    if booking.dentist_id != dentist.id:
+        return abort(400, description="That's not your patient")
+    
+    treatment_fields = treatment_schema.load(request.json)
+    
+    treatment = Treatment()
+    treatment.service = treatment_fields["service"]
+    treatment.fee = treatment_fields["fee"]
+    treatment.booking_id = id
+
+    db.session.add(treatment)
+    db.session.commit()
+
+    return jsonify(treatment_schema.dump(treatment))

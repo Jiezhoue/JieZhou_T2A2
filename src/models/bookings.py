@@ -9,5 +9,10 @@ class Booking(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     dentist_id = db.Column(db.Integer, db.ForeignKey("dentists.id"), nullable=False)
 
+    treatment = db.relationship(
+        "Treatment",
+        backref="booking",
+        cascade="all, delete"
+    )
 
 
