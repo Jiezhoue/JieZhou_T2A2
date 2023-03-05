@@ -5,14 +5,43 @@ from schema.user_schema import user_schema, users_schema
 from main import bcrypt
 from flask_jwt_extended import create_access_token
 from marshmallow.exceptions import ValidationError
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth.get("/users")
+@jwt_required()
 def get_user():
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    if not user.admin:
+        return abort(401, description="Unauthorized User")
+
     users = User.query.all()
     result = users_schema.dump(users)
     return jsonify(result)
+
+
+
+@auth.get("/user/<int:id>")
+@jwt_required()
+def patient_info(id):
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    if not user.admin:
+        return abort(401, description="Unauthorized User")
+    
+    patient = User.query.filter_by(id=id).first()
+    if not patient:
+        return abort(401, description="Patient not exist")
+    
+    result = user_schema.dump(patient)
+    return jsonify(result)
+
 
 
 @auth.post("/login")

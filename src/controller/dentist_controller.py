@@ -102,7 +102,7 @@ def book_treatment(id):
         delta = t1 - t2
         sec = delta.total_seconds()
         if abs(sec) < 1800:
-            return abort(400, description="time not avaliable")
+            return abort(400, description="This time period is already book out, please selete another time")
 
     booking = Booking()
     booking.date = booking_fields["date"]
@@ -153,6 +153,8 @@ def add_treatment(id):
         return abort(400, description="booking not exist")
     if booking.dentist_id != dentist.id:
         return abort(400, description="That's not your patient")
+    if booking.status != "Close":
+        return abort(400, description="You have to close this booking to add treatment details.")
     
     treatment_fields = treatment_schema.load(request.json)
     

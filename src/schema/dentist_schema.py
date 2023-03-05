@@ -2,10 +2,12 @@ from main import ma
 
 
 class DentistSchema(ma.Schema):
-  class Meta:
-    ordered= True
+    
+    class Meta:
+        ordered= True
 
-    fields = ("id", "f_name", "l_name", "username", "password", "speciality")
+        fields = ("id", "f_name", "l_name", "username", "password", "speciality")
+        load_only = ["username", "password"]
 
 
 

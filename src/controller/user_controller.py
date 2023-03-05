@@ -36,11 +36,11 @@ def cancel_booking():
     
     booking = Booking.query.filter_by(user_id=user.id, status="Open").first()
     if not booking:
-        return abort(400, description="no booking in the system")
+        return abort(400, description="no open booking in the system")
     db.session.delete(booking)
     db.session.commit()
 
-    return jsonify(booking_schema.dump(booking))
+    return jsonify(user_schema.dump(user))
     
 
 
