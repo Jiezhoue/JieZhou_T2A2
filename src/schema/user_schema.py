@@ -1,6 +1,7 @@
 from main import ma
 from marshmallow.validate import Length
 from schema.booking_schema import booking_schema, bookings_schema
+from marshmallow import fields
 
 
 # SCHEMAS AREA
@@ -13,5 +14,7 @@ class UserSchema(ma.Schema):
     password = ma.String(validate=Length(min=8))
     booking = ma.List(ma.Nested("BookingSchema", exclude=("user_id",)))
 
+
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
