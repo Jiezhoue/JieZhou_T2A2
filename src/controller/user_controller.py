@@ -18,7 +18,7 @@ patient = Blueprint('patient', __name__, url_prefix='/patient')
 @patient.get("/info")
 @jwt_required()
 @user_authentication
-def patient_info(user, **kwargs):
+def patient_info(user):
     # user_name = get_jwt_identity()
     # user = User.query.filter_by(username=user_name).first()
     # if not user:
@@ -31,7 +31,7 @@ def patient_info(user, **kwargs):
 @patient.delete("/cancel")
 @jwt_required()
 @user_authentication
-def cancel_booking(user, **kwargs):
+def cancel_booking(user):
     # user_name = get_jwt_identity()
     # user = User.query.filter_by(username=user_name).first()
     # if not user:
@@ -101,4 +101,24 @@ def update_info(user, **kwargs):
     except:
         return jsonify({"message": "Invalid Input"})
     
+
+@patient.get("/<int:id>/fees")
+@jwt_required()
+def treatment_fee(id):
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    
+    booking = Booking.query.filter_by(id=id).first()
+    if not booking:
+        return abort(400, description="Booking is not exist")
+    if booking.user_id != user.id:
+        return abort(400, description="this booking is not yours")
+
+    total_amount = 0
+    for x in booking.treatment:
+        total_amount += x.fee
+    
+    return jsonify({"Booking ID: ": booking.id, "Total amount:": total_amount})
 

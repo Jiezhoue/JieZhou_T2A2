@@ -198,3 +198,40 @@ def delete_treatment(booking_id, treatment_id):
     db.session.commit()
 
     return jsonify(treatment_schema.dump(treatment))
+
+@dentist.put("/<int:booking_id>/<int:treatment_id>/update")
+@jwt_required()
+def update_treatment(booking_id, treatment_id):
+    dentist_name = get_jwt_identity()
+    dentist = Dentist.query.filter_by(username=dentist_name).first()
+    if not dentist:
+        return abort(400, description="Invalid dentist account")
+    
+    booking = Booking.query.filter_by(id=booking_id).first()
+    if not booking:
+        return abort(400, description="booking not exist")
+    if booking.dentist_id != dentist.id:
+        return abort(400, description="That's not your patient")
+    
+    
+    treatment = Treatment.query.filter_by(id=treatment_id).first()
+    if not treatment:
+        return abort(400, description="This treatment is not exist")
+    
+    treatment_fields = treatment_schema.load(request.json)
+
+    if "service" in treatment_fields:
+        treatment.service = treatment_fields["service"]
+    if "fee" in treatment_fields:
+        treatment.fee = treatment_fields["fee"]
+
+    db.session.commit()
+
+    return jsonify(treatment_schema.dump(treatment))
+
+@dentist.get("/search")
+def search_dentist():
+
+    dentists = Dentist.query.filter_by(speciality = request.args.get('speciality'))
+
+    return jsonify(dentists_schema.dump(dentists))
