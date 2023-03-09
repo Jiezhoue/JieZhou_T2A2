@@ -88,6 +88,7 @@ def seed():
     booking1.time = "14:30:00"
     booking1.user_id = 2
     booking1.dentist_id = 1
+    booking1.status = "Close"
 
     db.session.add(booking1)
     db.session.commit()
@@ -97,6 +98,7 @@ def seed():
     booking2.time = "08:15:00"
     booking2.user = user1
     booking2.dentist = dentist1
+    booking2.status = "Close"
 
     db.session.add(booking2)
     db.session.commit()

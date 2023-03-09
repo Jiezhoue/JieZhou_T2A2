@@ -51,6 +51,7 @@ def cancel_booking(user):
 @jwt_required()
 @admin_authentication
 def treatment():
+    
     treatment = Treatment.query.all()
 
     return jsonify(treatments_schema.dump(treatment))
@@ -79,13 +80,13 @@ def bookings():
 @patient.put("/update")
 @jwt_required()
 @user_authentication
-def update_info(user, **kwargs):
+def update_info(user):
     # user_name = get_jwt_identity()
     # user = User.query.filter_by(username=user_name).first()
     # if not user:
     #     return abort(401, description="Invaild user")
     
-    #update info only based on what's in the json file, could be one or many arributes
+    # update info only based on what's in the json file, could be one or many arributes
     try:
         user_fields = user_schema.load(request.json)
 
@@ -104,11 +105,12 @@ def update_info(user, **kwargs):
 
 @patient.get("/<int:id>/fees")
 @jwt_required()
-def treatment_fee(id):
-    user_name = get_jwt_identity()
-    user = User.query.filter_by(username=user_name).first()
-    if not user:
-        return abort(401, description="Invaild user")
+@user_authentication
+def treatment_fee(user,id):
+    # user_name = get_jwt_identity()
+    # user = User.query.filter_by(username=user_name).first()
+    # if not user:
+    #     return abort(401, description="Invaild user")
     
     booking = Booking.query.filter_by(id=id).first()
     if not booking:

@@ -76,3 +76,233 @@ The original ERD when submit on the discord
 After discuss, the final ERD more focus on the core functions
 
 ![final](/docs/dental_final.jpg)
+
+
+# R7. Detail any third party services that your app will use
+
+###  1. SQLAlchemy
+```py
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+```
+
+SQLAlchemy is a Python library that provides a set of tools for working with relational databases using an object-relational mapping (ORM) approach.
+
+-----------------
+
+### 2. Marshmallow
+```py
+from flask_marshmallow import Marshmallow
+from marshmallow.validate import Length
+from marshmallow.exceptions import ValidationError
+```
+```py
+ma = Marshmallow()
+```
+
+Marshmallow allows you to define schemas for your Flask models, making it easy to serialize and deserialize them.
+
+```py
+password = ma.String(validate=Length(min=8))
+```
+
+
+```py
+#User login the dental system
+@auth.post("/login")
+def user_login():
+    try:
+        user_fields = user_schema.load(request.json)
+        user = User.query.filter_by(username=user_fields["username"]).first()
+        #Verifiy the username and password, let user know which one is not correct.
+        if not user:
+            return abort(401, description="username is not exist")
+        elif not bcrypt.check_password_hash(user.password, user_fields["password"]):
+            return abort(401, description="password is not right")
+        access_token = create_access_token(identity=str(user.username))
+        return jsonify({"user": user.username, "token": access_token})
+    except ValidationError:
+        return abort(401, description="minimun password length is 8")
+```
+
+Using "marshmallow.validate" and "marshmallow.exceptions" can automatically deserialize incoming JSON data and validate it against a Marshmallow schema, helping to ensure that your application receives valid data.
+
+-----
+### 3. Bcrypt
+```py
+from flask_bcrypt import Bcrypt
+
+user_fields = user_schema.load(request.json)
+user.username = user_fields["username"]
+user.password = bcrypt.generate_password_hash(user_fields["password"]).decode("utf-8")
+
+db.session.add(user)
+db.session.commit()
+```
+
+Using Bcrypt extension can take a plain text password and converting it into a hashed value that is difficult to reverse.
+It helps to protect against common security threats like password cracking and SQL injection.
+
+----------------------------------------
+
+### 4. JWT
+
+```py
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
+```
+```py
+jwt = JWTManager()
+
+access_token = create_access_token(identity=str(user.username))
+```
+```py
+#Admin delete patient's account
+@auth.delete("/user/delete/<int:id>")
+@jwt_required()
+def delete_user(id):
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    if not user.admin:
+        return abort(401, description="Unauthorized user")
+    
+    patient = User.query.filter_by(id=id).first()
+    if not patient:
+        return abort(400, description="Can't find that user")
+    if patient.admin:
+        return abort(400, description="Can't delelte admin account")
+    
+    db.session.delete(patient)
+    db.session.commit()
+    return jsonify({"Patient {x} {y}".format(x=patient.f_name, y=patient.l_name): "has been deleted"})
+```
+We use jwt flask entension to provide JSON Web Token to authenticate and authorize in this app. It provides decorators for easily restricting access to certain endpoints based on the user's permissions.
+
+----------------------------------
+
+### 5. datetime and functools
+```py
+from datetime import datetime
+
+@dentist.post("/<int:id>/booking")
+@jwt_required()
+def book_treatment(id):
+    user_name = get_jwt_identity()
+    user = User.query.filter_by(username=user_name).first()
+    if not user:
+        return abort(401, description="Invaild user")
+    
+    booking_fields = booking_schema.load(request.json)
+
+    dentist = Dentist.query.filter_by(id=id).first()
+
+    if not dentist:
+        return abort(400, description="dentist not exist")
+    
+    exist = Booking.query.filter_by(user_id=user.id, status="Open").first()
+    if exist:
+        return abort(400, description="You already have a open booking in the system. Before booking a new one, please ensure to cancel any existing booking in the system.")
+
+    data = Booking.query.filter_by(dentist_id=id, date=booking_fields["date"])
+
+
+    for book in data:
+        t1 = datetime.strptime(str(book.time), '%H:%M:%S')
+        print(t1)
+        t2 = datetime.strptime(booking_fields["time"], '%H:%M:%S')
+        print(t2)
+        delta = t1 - t2
+        sec = delta.total_seconds()
+        if abs(sec) < 1800:
+            return abort(400, description="This time period is already book out, please selete another time")
+
+    booking = Booking()
+    booking.date = booking_fields["date"]
+    booking.time = booking_fields["time"]
+    if "status" in booking_fields:
+        booking.status = booking_fields["status"]
+    booking.user_id = user.id
+    booking.dentist_id = id
+    db.session.add(booking)
+    db.session.commit()
+
+    return jsonify(booking_schema.dump(booking))
+
+```
+The basic idea of a patient booking appointment with a dentist is we assumed each appiontment time for a specific dentist is 30min. So if 16:00:00 is booked, the time slot between 15:30:01 to 16:00:00 and time slot between 16:00:00 to 16:29:59 is not avaliable for any new bookings. Therefore we need to use "datetime.strptime" to calculate the difference between two booking time.
+
+```py
+from functools import wraps
+
+def admin_authentication(func):
+    @wraps(func)
+    def wrapper():
+        user_username = get_jwt_identity()
+        user = User.query.filter_by(username=user_username).first()
+        if not user:
+            return abort(400, description="Invalid User")
+    
+        if not user.admin:
+            return abort(400, description="You don't have permission to access system")
+
+        return func()      
+    return wrapper
+
+#Only admin account can retrieve all user's information 
+@auth.get("/users")
+@jwt_required()
+@admin_authentication
+def get_user():
+    # user_name = get_jwt_identity()
+    # user = User.query.filter_by(username=user_name).first()
+    # if not user:
+    #     return abort(401, description="Invaild user")
+    # if not user.admin:
+    #     return abort(401, description="Unauthorized User")
+
+    users = User.query.all()
+    result = users_schema.dump(users)
+    return jsonify(result)
+```
+
+I create a decorator here to reduce the repeated admin account authentication code in each Endpoint.
+
+--------------------------
+
+### 6. Blueprint
+
+```py
+from flask import jsonify, Blueprint
+
+auth = Blueprint('auth', __name__, url_prefix='/auth')
+```
+I use flask Blueprint in this project to break this application into smaller components, each with its own routes, views, and templates. This makes it easier to manage and maintain this application as it grows.
+
+----------
+### R8. Describe your projects models in terms of the relationships they have with each other
+
+------------
+
+### R9. Discuss the database relations to be implemented in your application
+
+![ERD](/docs/dental_final.jpg)
+
+Based on the ERD, there will be 4 tables inplemented in this app.
+- Users (Patients/Admin)
+- Dentists
+- Bookings
+- Treatments
+
+1. one user can have many bookings
+2. one user can only have one booking with "Open" status
+3. one booking only belongs to one user
+4. one booking only belongs to one dentist
+5. one dentist can have many bookings
+6. one booking can have many treatments
+7. one treatment only belongs to one booking
+
+--------------

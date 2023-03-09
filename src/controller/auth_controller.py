@@ -14,7 +14,7 @@ auth = Blueprint('auth', __name__, url_prefix='/auth')
 
 def admin_authentication(func):
     @wraps(func)
-    def wrapper():
+    def wrapper(*args, **kwargs):
         user_username = get_jwt_identity()
         user = User.query.filter_by(username=user_username).first()
         if not user:
@@ -23,7 +23,7 @@ def admin_authentication(func):
         if not user.admin:
             return abort(400, description="You don't have permission to access system")
 
-        return func()      
+        return func(*args, **kwargs)      
     return wrapper
 
 def user_authentication(func):
@@ -34,8 +34,20 @@ def user_authentication(func):
         if not user:
             return abort(400, description="Invalid User")
 
-        return func(*args, **kwargs)      
+        return func(user, *args, **kwargs)      
     return wrapper
+
+def dentist_authentication(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        dentist_name = get_jwt_identity()
+        dentist = Dentist.query.filter_by(username=dentist_name).first()
+        if not dentist:
+            return abort(400, description="Invalid dentist account")
+
+        return func(dentist, *args, **kwargs)      
+    return wrapper
+
 
 #Only admin account can retrieve all user's information 
 @auth.get("/users")
@@ -103,6 +115,8 @@ def signup():
             return abort(401, description="Username is already registered. Please choose another username.")
 
         user = User()
+        if not isinstance(user_fields["f_name"], str):
+            return abort(400, description="f_name should be string")
         user.f_name = user_fields["f_name"]
         user.l_name = user_fields["l_name"]
 
@@ -118,8 +132,11 @@ def signup():
         access_token = create_access_token(identity=str(user.username))
         return jsonify({"user": user.username, "token":access_token})
     #the password length has to be more than 8 digit
-    except ValidationError:
-        return abort(401, description="minimun password length is 8")
+    except ValidationError as e:
+        # return abort(401, description="minimun password length is 8")
+        return abort(401, description = e.messages)
+    except KeyError as e:
+        return abort(401, description = f"{e.args} is missing" )
 
 
 #Admin delete patient's account

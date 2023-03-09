@@ -16,7 +16,10 @@ from datetime import datetime
 from models.treatments import Treatment
 from schema.treatment_schema import treatment_schema, treatments_schema
 
-from controller.user_controller import user_authentication
+# from controller.user_controller import user_authentication
+from controller.auth_controller import user_authentication
+from controller.auth_controller import dentist_authentication
+
 
 dentist = Blueprint('dentist', __name__, url_prefix="/dentists")
 
@@ -80,11 +83,12 @@ def dentist_signup():
 
 @dentist.post("/<int:id>/booking")
 @jwt_required()
-def book_treatment(id):
-    user_name = get_jwt_identity()
-    user = User.query.filter_by(username=user_name).first()
-    if not user:
-        return abort(401, description="Invaild user")
+@user_authentication
+def book_treatment(user,id):
+    # user_name = get_jwt_identity()
+    # user = User.query.filter_by(username=user_name).first()
+    # if not user:
+    #     return abort(401, description="Invaild user")
     
     booking_fields = booking_schema.load(request.json)
 
@@ -125,11 +129,12 @@ def book_treatment(id):
 
 @dentist.put("/<int:id>/close")
 @jwt_required()
-def close_booking(id):
-    dentist_name = get_jwt_identity()
-    dentist = Dentist.query.filter_by(username=dentist_name).first()
-    if not dentist:
-        return abort(400, description="Invalid dentist account")
+@dentist_authentication
+def close_booking(dentist,id):
+    # dentist_name = get_jwt_identity()
+    # dentist = Dentist.query.filter_by(username=dentist_name).first()
+    # if not dentist:
+    #     return abort(400, description="Invalid dentist account")
     
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
@@ -148,11 +153,12 @@ def close_booking(id):
 
 @dentist.post("/<int:id>/add")
 @jwt_required()
-def add_treatment(id):
-    dentist_name = get_jwt_identity()
-    dentist = Dentist.query.filter_by(username=dentist_name).first()
-    if not dentist:
-        return abort(400, description="Invalid dentist account")
+@dentist_authentication
+def add_treatment(dentist, id):
+    # dentist_name = get_jwt_identity()
+    # dentist = Dentist.query.filter_by(username=dentist_name).first()
+    # if not dentist:
+    #     return abort(400, description="Invalid dentist account")
     
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
@@ -177,11 +183,12 @@ def add_treatment(id):
 
 @dentist.delete("/<int:booking_id>/<int:treatment_id>/delete")
 @jwt_required()
-def delete_treatment(booking_id, treatment_id):
-    dentist_name = get_jwt_identity()
-    dentist = Dentist.query.filter_by(username=dentist_name).first()
-    if not dentist:
-        return abort(400, description="Invalid dentist account")
+@dentist_authentication
+def delete_treatment(dentist, booking_id, treatment_id):
+    # dentist_name = get_jwt_identity()
+    # dentist = Dentist.query.filter_by(username=dentist_name).first()
+    # if not dentist:
+    #     return abort(400, description="Invalid dentist account")
     
     booking = Booking.query.filter_by(id=booking_id).first()
     if not booking:
@@ -201,11 +208,12 @@ def delete_treatment(booking_id, treatment_id):
 
 @dentist.put("/<int:booking_id>/<int:treatment_id>/update")
 @jwt_required()
-def update_treatment(booking_id, treatment_id):
-    dentist_name = get_jwt_identity()
-    dentist = Dentist.query.filter_by(username=dentist_name).first()
-    if not dentist:
-        return abort(400, description="Invalid dentist account")
+@dentist_authentication
+def update_treatment(dentist,booking_id, treatment_id):
+    # dentist_name = get_jwt_identity()
+    # dentist = Dentist.query.filter_by(username=dentist_name).first()
+    # if not dentist:
+    #     return abort(400, description="Invalid dentist account")
     
     booking = Booking.query.filter_by(id=booking_id).first()
     if not booking:
