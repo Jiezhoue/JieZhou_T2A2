@@ -4,7 +4,6 @@ from controller.auth_controller import auth
 from controller.user_controller import patient
 
 
-
 registerable_controllers =[
     home,
     dentist,

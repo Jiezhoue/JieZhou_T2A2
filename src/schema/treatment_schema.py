@@ -8,7 +8,5 @@ class TreatmentSchema(ma.Schema):
         fields = ("id", "service", "fee", "booking_id")
         load_only = ["booking_id"]
 
-
-
 treatment_schema = TreatmentSchema()
 treatments_schema = TreatmentSchema(many=True)

@@ -8,7 +8,7 @@ class DentistSchema(ma.Schema):
 
         fields = ("id", "f_name", "l_name", "username", "password", "speciality")
         load_only = ["username", "password"]
-    # booking = ma.List(ma.Nested("BookingSchema", exclude=("id", "user_id", "dentist_id", "dentist", "treatment",)))
+    # booking = ma.List(ma.Nested("BookingSchema", exclude=("user_id",)))
 
 
 dentist_schema = DentistSchema()

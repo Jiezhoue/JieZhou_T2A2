@@ -10,9 +10,9 @@ from models.dentists import Dentist
 from schema.dentist_schema import dentist_schema, dentists_schema
 from functools import wraps
 from models.bookings import Booking
-from schema.booking_schema import simple_booking_schema, simple_bookings_schema
 from schema.user_schema import user_register_schema
 from schema.user_schema import user_login_schema
+from schema.booking_schema import booking_schema, bookings_schema
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -170,13 +170,13 @@ def delete_dentist(id):
     db.session.commit()
     return jsonify({"Dentist {x} {y}".format(x=dentist.f_name, y=dentist.l_name): "has been deleted"})
 
-
+#Admin search the booking records based on the "status", Admin can see how many on going "Open" booking in the database
 @auth.get("/bookings/search")
 @jwt_required()
 @admin_authentication
 def bookings_search():
  
     bookings = Booking.query.filter_by(status = request.args.get('status'))
-    return jsonify(simple_bookings_schema.dump(bookings))
+    return jsonify(bookings_schema.dump(bookings))
 
 

@@ -3,7 +3,6 @@ from main import db
 from models.users import User
 from schema.user_schema import user_schema, users_schema
 from main import bcrypt
-from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.bookings import Booking
 from schema.booking_schema import booking_schema, bookings_schema
@@ -13,10 +12,10 @@ from schema.treatment_schema import treatment_schema, treatments_schema
 from controller.auth_controller import admin_authentication
 from controller.auth_controller import user_authentication
 
-from schema.booking_schema import simple_bookings_schema, simple_booking_schema
 
 patient = Blueprint('patient', __name__, url_prefix='/patient')
 
+#User(Admin/Patient) can get their own personal info with the booking records
 @patient.get("/info")
 @jwt_required()
 @user_authentication
@@ -26,6 +25,7 @@ def patient_info(user):
     return jsonify(result)
 
 
+#User can cancel the booking if the status is "Open"
 @patient.delete("/cancel")
 @jwt_required()
 @user_authentication
@@ -40,6 +40,7 @@ def cancel_booking(user):
     return jsonify(user_schema.dump(user))
     
 
+#Admin can check all the booking details.
 @patient.get("/bookings")
 @jwt_required()
 @admin_authentication
@@ -47,7 +48,7 @@ def bookings():
  
     bookings = Booking.query.all()
 
-    return jsonify(simple_bookings_schema.dump(bookings))
+    return jsonify(bookings_schema.dump(bookings))
 
 
 
@@ -70,21 +71,25 @@ def update_info(user):
         
         db.session.commit()
         return jsonify(user_schema.dump(user))
+    #return an error if anything wrong with the json file
     except:
-        return jsonify({"message": "Invalid Input"})
+        return jsonify({"message": "You can only update your f_name, l_name or mobile"})
     
 
+
+#User can get one of their booking total fees
 @patient.get("/<int:id>/fees")
 @jwt_required()
 @user_authentication
 def treatment_fee(user,id):
-  
+    #check if the booking exist or not, belongs to this user or not.
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
         return abort(400, description="Booking is not exist")
     if booking.user_id != user.id:
         return abort(400, description="this booking is not yours")
 
+    # use for loop to get all fees under single booking and add them together
     total_amount = 0
     for x in booking.treatment:
         total_amount += x.fee
