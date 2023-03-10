@@ -13,17 +13,15 @@ from schema.treatment_schema import treatment_schema, treatments_schema
 from controller.auth_controller import admin_authentication
 from controller.auth_controller import user_authentication
 
+from schema.booking_schema import simple_bookings_schema, simple_booking_schema
+
 patient = Blueprint('patient', __name__, url_prefix='/patient')
 
 @patient.get("/info")
 @jwt_required()
 @user_authentication
 def patient_info(user):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    
+
     result = user_schema.dump(user)
     return jsonify(result)
 
@@ -32,47 +30,24 @@ def patient_info(user):
 @jwt_required()
 @user_authentication
 def cancel_booking(user):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    
+   
     booking = Booking.query.filter_by(user_id=user.id, status="Open").first()
     if not booking:
-        return abort(400, description="no open booking in the system")
+        return abort(400, description="There is no open booking in the system")
     db.session.delete(booking)
     db.session.commit()
 
     return jsonify(user_schema.dump(user))
     
 
-
-@patient.get("/treatment")
-@jwt_required()
-@admin_authentication
-def treatment():
-    
-    treatment = Treatment.query.all()
-
-    return jsonify(treatments_schema.dump(treatment))
-
-
-
 @patient.get("/bookings")
 @jwt_required()
 @admin_authentication
 def bookings():
-    # user_username = get_jwt_identity()
-    # user = User.query.filter_by(username=user_username).first()
-    # if not user:
-    #     return abort(400, description="Invalid User")
-    
-    # if not user.admin:
-    #     return abort(400, description="You don't have permission to access system")
-    
+ 
     bookings = Booking.query.all()
 
-    return jsonify(bookings_schema.dump(bookings))
+    return jsonify(simple_bookings_schema.dump(bookings))
 
 
 
@@ -81,11 +56,7 @@ def bookings():
 @jwt_required()
 @user_authentication
 def update_info(user):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    
+  
     # update info only based on what's in the json file, could be one or many arributes
     try:
         user_fields = user_schema.load(request.json)
@@ -107,11 +78,7 @@ def update_info(user):
 @jwt_required()
 @user_authentication
 def treatment_fee(user,id):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    
+  
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
         return abort(400, description="Booking is not exist")

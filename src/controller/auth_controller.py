@@ -9,9 +9,14 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.dentists import Dentist
 from schema.dentist_schema import dentist_schema, dentists_schema
 from functools import wraps
+from models.bookings import Booking
+from schema.booking_schema import simple_booking_schema, simple_bookings_schema
+from schema.user_schema import user_register_schema
+from schema.user_schema import user_login_schema
 
 auth = Blueprint('auth', __name__, url_prefix='/auth')
 
+#decorator for admin account authentication
 def admin_authentication(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -26,6 +31,8 @@ def admin_authentication(func):
         return func(*args, **kwargs)      
     return wrapper
 
+
+#decorator for normal user(patient) accounts authentication
 def user_authentication(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -37,6 +44,8 @@ def user_authentication(func):
         return func(user, *args, **kwargs)      
     return wrapper
 
+
+#decorator for all dentist accounts authentication
 def dentist_authentication(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -54,12 +63,6 @@ def dentist_authentication(func):
 @jwt_required()
 @admin_authentication
 def get_user():
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    # if not user.admin:
-    #     return abort(401, description="Unauthorized User")
 
     users = User.query.all()
     result = users_schema.dump(users)
@@ -71,13 +74,7 @@ def get_user():
 @jwt_required()
 @admin_authentication
 def patient_info(id):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    # if not user.admin:
-    #     return abort(401, description="Unauthorized User")
-    
+
     patient = User.query.filter_by(id=id).first()
     if not patient:
         return abort(401, description="Patient not exist")
@@ -86,11 +83,11 @@ def patient_info(id):
     return jsonify(result)
 
 
-#User login the dental system
+#Admin/User(patient) login the dental system
 @auth.post("/login")
 def user_login():
     try:
-        user_fields = user_schema.load(request.json)
+        user_fields = user_login_schema.load(request.json)
         user = User.query.filter_by(username=user_fields["username"]).first()
         #Verifiy the username and password, let user know which one is not correct.
         if not user:
@@ -99,15 +96,19 @@ def user_login():
             return abort(401, description="password is not right")
         access_token = create_access_token(identity=str(user.username))
         return jsonify({"user": user.username, "token": access_token})
-    except ValidationError:
-        return abort(401, description="minimun password length is 8")
+    # return an error if the value fields did't match the user schema requirement
+    except ValidationError as e:
+        return abort(401, description=e.messages)
+    #if json file missing any compulsory fields, will notify the user which field is missing
+    except KeyError as e:
+        return abort(401, description = f"{e.args} is missing" )
 
 
 #User can register an account
 @auth.post("/signup")
 def signup():
     try:
-        user_fields = user_schema.load(request.json)
+        user_fields = user_register_schema.load(request.json)
         user = User.query.filter_by(username=user_fields["username"]).first()
 
         #can't have same username in the system, check the duplication
@@ -115,8 +116,6 @@ def signup():
             return abort(401, description="Username is already registered. Please choose another username.")
 
         user = User()
-        if not isinstance(user_fields["f_name"], str):
-            return abort(400, description="f_name should be string")
         user.f_name = user_fields["f_name"]
         user.l_name = user_fields["l_name"]
 
@@ -131,10 +130,10 @@ def signup():
 
         access_token = create_access_token(identity=str(user.username))
         return jsonify({"user": user.username, "token":access_token})
-    #the password length has to be more than 8 digit
+    # return an error if the value fields did't match the user schema requirement
     except ValidationError as e:
-        # return abort(401, description="minimun password length is 8")
         return abort(401, description = e.messages)
+    # return an error if some of the compulsory field are missing
     except KeyError as e:
         return abort(401, description = f"{e.args} is missing" )
 
@@ -144,13 +143,7 @@ def signup():
 @jwt_required()
 @admin_authentication
 def delete_user(id):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    # if not user.admin:
-    #     return abort(401, description="Unauthorized user")
-    
+
     patient = User.query.filter_by(id=id).first()
     if not patient:
         return abort(400, description="Can't find that user")
@@ -168,13 +161,7 @@ def delete_user(id):
 @jwt_required()
 @admin_authentication
 def delete_dentist(id):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    # if not user.admin:
-    #     return abort(401, description="Unauthorized user")
-    
+  
     dentist = Dentist.query.filter_by(id=id).first()
     if not dentist:
         return abort(400, description="Can't find that dentist")
@@ -182,4 +169,14 @@ def delete_dentist(id):
     db.session.delete(dentist)
     db.session.commit()
     return jsonify({"Dentist {x} {y}".format(x=dentist.f_name, y=dentist.l_name): "has been deleted"})
+
+
+@auth.get("/bookings/search")
+@jwt_required()
+@admin_authentication
+def bookings_search():
+ 
+    bookings = Booking.query.filter_by(status = request.args.get('status'))
+    return jsonify(simple_bookings_schema.dump(bookings))
+
 

@@ -16,9 +16,9 @@ from datetime import datetime
 from models.treatments import Treatment
 from schema.treatment_schema import treatment_schema, treatments_schema
 
-# from controller.user_controller import user_authentication
 from controller.auth_controller import user_authentication
 from controller.auth_controller import dentist_authentication
+from schema.booking_schema import treatment_booking_schema, treatment_bookings_schema
 
 
 dentist = Blueprint('dentist', __name__, url_prefix="/dentists")
@@ -50,13 +50,6 @@ from controller.user_controller import admin_authentication
 @jwt_required()
 @admin_authentication
 def dentist_signup():
-    # user_username = get_jwt_identity()
-    # user = User.query.filter_by(username=user_username).first()
-    # if not user:
-    #     return abort(400, description="Invalid User")
-    
-    # if not user.admin:
-    #     return abort(400, description="You don't have permission to access system")
 
     dentist_fields = dentist_schema.load(request.json)
     dentist = Dentist.query.filter_by(username=dentist_fields["username"]).first()
@@ -85,11 +78,7 @@ def dentist_signup():
 @jwt_required()
 @user_authentication
 def book_treatment(user,id):
-    # user_name = get_jwt_identity()
-    # user = User.query.filter_by(username=user_name).first()
-    # if not user:
-    #     return abort(401, description="Invaild user")
-    
+  
     booking_fields = booking_schema.load(request.json)
 
     dentist = Dentist.query.filter_by(id=id).first()
@@ -103,16 +92,16 @@ def book_treatment(user,id):
 
     data = Booking.query.filter_by(dentist_id=id, date=booking_fields["date"])
 
-
-    for book in data:
-        t1 = datetime.strptime(str(book.time), '%H:%M:%S')
-        print(t1)
-        t2 = datetime.strptime(booking_fields["time"], '%H:%M:%S')
-        print(t2)
-        delta = t1 - t2
-        sec = delta.total_seconds()
-        if abs(sec) < 1800:
-            return abort(400, description="This time period is already book out, please selete another time")
+    if data:
+        for book in data:
+            t1 = datetime.strptime(str(book.time), '%H:%M:%S')
+            print(t1)
+            t2 = datetime.strptime(booking_fields["time"], '%H:%M:%S')
+            print(t2)
+            delta = t1 - t2
+            sec = delta.total_seconds()
+            if abs(sec) < 1800:
+                return abort(400, description="This time period is already book out, please selete another time")
 
     booking = Booking()
     booking.date = booking_fields["date"]
@@ -131,17 +120,14 @@ def book_treatment(user,id):
 @jwt_required()
 @dentist_authentication
 def close_booking(dentist,id):
-    # dentist_name = get_jwt_identity()
-    # dentist = Dentist.query.filter_by(username=dentist_name).first()
-    # if not dentist:
-    #     return abort(400, description="Invalid dentist account")
-    
+  
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
         return abort(400, description="booking not exist")
     if booking.dentist_id != dentist.id:
         return abort(400, description="That's not your patient")
-    
+    if booking.status == "Close":
+        return abort(400, description="This booking is already closed!")
 
     booking.status = "Close"
 
@@ -155,11 +141,7 @@ def close_booking(dentist,id):
 @jwt_required()
 @dentist_authentication
 def add_treatment(dentist, id):
-    # dentist_name = get_jwt_identity()
-    # dentist = Dentist.query.filter_by(username=dentist_name).first()
-    # if not dentist:
-    #     return abort(400, description="Invalid dentist account")
-    
+ 
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
         return abort(400, description="booking not exist")
@@ -185,11 +167,7 @@ def add_treatment(dentist, id):
 @jwt_required()
 @dentist_authentication
 def delete_treatment(dentist, booking_id, treatment_id):
-    # dentist_name = get_jwt_identity()
-    # dentist = Dentist.query.filter_by(username=dentist_name).first()
-    # if not dentist:
-    #     return abort(400, description="Invalid dentist account")
-    
+ 
     booking = Booking.query.filter_by(id=booking_id).first()
     if not booking:
         return abort(400, description="booking not exist")
@@ -210,11 +188,7 @@ def delete_treatment(dentist, booking_id, treatment_id):
 @jwt_required()
 @dentist_authentication
 def update_treatment(dentist,booking_id, treatment_id):
-    # dentist_name = get_jwt_identity()
-    # dentist = Dentist.query.filter_by(username=dentist_name).first()
-    # if not dentist:
-    #     return abort(400, description="Invalid dentist account")
-    
+ 
     booking = Booking.query.filter_by(id=booking_id).first()
     if not booking:
         return abort(400, description="booking not exist")
@@ -243,3 +217,16 @@ def search_dentist():
     dentists = Dentist.query.filter_by(speciality = request.args.get('speciality'))
 
     return jsonify(dentists_schema.dump(dentists))
+
+@dentist.get("/bookings")
+@jwt_required()
+# @dentist_authentication
+def all_bookings():
+    dentist_name = get_jwt_identity()
+    dentist = Dentist.query.filter_by(username=dentist_name).first()
+    if not dentist:
+        return abort(400, description="Invalid dentist account")
+    
+    bookings = Booking.query.filter_by(dentist_id = dentist.id)
+    return jsonify(treatment_bookings_schema.dump(bookings))
+    
