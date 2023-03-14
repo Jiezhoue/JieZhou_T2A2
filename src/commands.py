@@ -9,18 +9,11 @@ from models.bookings import Booking
 db_command = Blueprint('db', __name__)
 
 # CLI COMMANDS AREA
-@db_command.cli.command('create')
-def create():
-    db.create_all()
-    print("Table created!")
-
-@db_command.cli.command('drop')
-def delete():
+@db_command.cli.command('reset')
+def reset():
     db.drop_all()
-    print("Table deleted!")
+    db.create_all()
 
-@db_command.cli.command('seed')
-def seed():
     user1 = User()
     user1.f_name = 'Eddy'
     user1.l_name = 'Zhou'
@@ -103,4 +96,5 @@ def seed():
     db.session.add(booking2)
     db.session.commit()
 
-    print("Table Seeded!")
+    print("Table created and seeded!")
+
