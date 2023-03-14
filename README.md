@@ -77,7 +77,7 @@ Here are some key functionalities of ORM
 
 http://127.0.0.1:5000/home
 
-![home](/docs/home_page.jpg)
+![home](./docs/home_result.png)
 
 ***
 
@@ -85,7 +85,7 @@ http://127.0.0.1:5000/home
 
 http://127.0.0.1:5000/dentists
 
-![home](/docs/Dentist_general_info.jpg)
+![home](./docs/Dentist_general_info.jpg)
 
 ***
 
@@ -101,17 +101,17 @@ Required data:
 }
 ```
 
-![lOGIN_1](/docs/user_login_1.jpg)
+![lOGIN_1](./docs/user_login_1.jpg)
 
 If there is anything missing (username/password) in Json file, error will be handled.
 
-![lOGIN_error_1](/docs/LOGINERROR_1.jpg)
+![lOGIN_error_1](./docs/LOGINERROR_1.jpg)
 
 
 
 If the username or password is not correct
 
-![lOGIN_error_2](/docs/LOGINERROR_2.jpg)
+![lOGIN_error_2](./docs/LOGINERROR_2.jpg)
 
 ### 4. (POST) Signup new user
 
@@ -128,7 +128,7 @@ Required data:
 }
 ```
 
-![Signup](/docs/signup_user.jpg)
+![Signup](./docs/signup_user.jpg)
 
 Below are some errors handling when request json file has some wrong inputs
 
@@ -139,7 +139,7 @@ From top to bottom
 3. typo for "f_", should be "f_name"
 4. username already been used
 
-![Signup](/docs/signup_error.jpg)
+![Signup](./docs/signup_error.jpg)
 
 ***
 
@@ -150,11 +150,11 @@ http://127.0.0.1:5000/auth/users
 Need access token from Admin Account, login admin account to get the token
 Admin account username: eddyzhou, password: 12345678
 
-![user_info](/docs/admin_get_user_info.jpg)
+![user_info](./docs/admin_get_user_info.jpg)
 
 Other returns when token is not given or not an Admin account
 
-![user_info](/docs/admin_get_user_info_error.jpg)
+![user_info](./docs/admin_get_user_info_error.jpg)
 
 ***
 
@@ -170,7 +170,7 @@ Required data:
 }
 ```
 
-![dentist_login](/docs/dentist_login.jpg)
+![dentist_login](./docs/dentist_login.jpg)
 
 Same as the user login, other returns should be handled as
 
@@ -180,7 +180,7 @@ From top to bottom
 2. password is not correct
 3. username is not correct
 
-![dentist_login_error](/docs/dentist_login_error.jpg)
+![dentist_login_error](./docs/dentist_login_error.jpg)
 
 ***
 
@@ -199,7 +199,7 @@ Required data:
 Need access token from Admin Account, login admin account to get the token
 Admin account username: eddyzhou, password: 12345678
 
-![dentist_create](/docs//admin_create_dentist.jpg)
+![dentist_create](./docs//admin_create_dentist.jpg)
 
 Same as the user registeration, other returns should be handled as
 
@@ -209,7 +209,7 @@ From top to bottom
 2. dentist's username already been used
 3. this is not a admin account
 
-![dentist_create_error](/docs/dentist_create_error.jpg)
+![dentist_create_error](./docs/dentist_create_error.jpg)
 
 ***
 
@@ -220,7 +220,7 @@ Need access token from specific User Account, login any user account to get the 
 
 http://127.0.0.1:5000/patient/info
 
-![user_personal_info](/docs/user_personal_info.jpg)
+![user_personal_info](./docs/user_personal_info.jpg)
 
 ***
 
@@ -241,7 +241,7 @@ http://127.0.0.1:5000/dentists/1/booking
 
 The number(1) in http request is represent the dentist id
 
-![booking](/docs/booking.jpg)
+![booking](./docs/booking.jpg)
 
 The booking part is the most complicated part in this API app.
 There will be a lots of logical restriction related to this booking request. Here are some of them listed below.
@@ -263,7 +263,7 @@ From top to bottom
 5. the booking time user selected is not avaliable, conlict with other user's booking
 6. the dentist id is not exist
 
-![booking_error](/docs/booking_error.jpg)
+![booking_error](./docs/booking_error.jpg)
 
 ***
 
@@ -276,12 +276,12 @@ http://127.0.0.1:5000/patient/cancel
 
 This is just delete the "Open" booking, other "Close" bookings under that user's name will still be there as records. Return will be all that user's info with his records.
 
-![booking_delete](/docs/delete_booking.jpg)
+![booking_delete](./docs/delete_booking.jpg)
 
 
 If there is no "Open" booking under user's account, should return as following
 
-![booking_delete_error](/docs/delete_booking_error.jpg)
+![booking_delete_error](./docs/delete_booking_error.jpg)
 
 ***
 
@@ -294,7 +294,7 @@ http://127.0.0.1:5000/dentists/3/close
 
 The number(3) in http request is represent the booking id
 
-![close_booking](/docs/close_booking.jpg)
+![close_booking](./docs/close_booking.jpg)
 
 Here are some returns should be handled as
 From top to bottom
@@ -303,7 +303,7 @@ From top to bottom
 2. The booking id in the request is not belongs to you, that means you can't modify other dentist's patient booking
 3. Need valid dentist token to access
 
-![close_booking_error](/docs/close_booking_error.jpg)
+![close_booking_error](./docs/close_booking_error.jpg)
 
 ***
 
@@ -324,7 +324,7 @@ http://127.0.0.1:5000/dentists/2/add
 
 The number(2) in http request is represent the booking id
 
-![dentist_add_treatment](/docs/dentist_add_treatment.jpg)
+![dentist_add_treatment](./docs/dentist_add_treatment.jpg)
 
 
 Here are some returns should be handled as
@@ -333,7 +333,7 @@ From top to bottom
 1. This booking is belongs to other dentist, you can't add treatments under that booking
 2. The booking id is not exist.
 
-![add_treatment_error](/docs/add_treatment_error.jpg)
+![add_treatment_error](./docs/add_treatment_error.jpg)
 
 ***
 
@@ -345,7 +345,7 @@ Authentication:
 Need access token from Admin Account, login Admin account to get the token
 Admin account username: eddyzhou, password: 12345678
 
-![booking_details](/docs/booking_details.jpg)
+![booking_details](./docs/booking_details.jpg)
 
 ***
 
@@ -360,7 +360,7 @@ Admin account username: eddyzhou, password: 12345678
 The number(2) in http request is represent the user id
 
 
-![single_user_info](/docs/admin_user_id.jpg)
+![single_user_info](./docs/admin_user_id.jpg)
 
 ***
 
@@ -372,7 +372,7 @@ Authentication:
 Need access token from User Account, login User account to get the token
 
 
-![update_user_info](/docs/update_user_info.jpg)
+![update_user_info](./docs/update_user_info.jpg)
 
 In the json file, you can only update "f_name", "l_name" or "mobile", but not "username" and "password".
 
@@ -389,7 +389,7 @@ Admin account username: eddyzhou, password: 12345678
 The number(3) in http request is represent the user id
 
 
-![delete_user](/docs/delete_user.jpg)
+![delete_user](./docs/delete_user.jpg)
 
 
 Here are some returns should be handled as
@@ -399,7 +399,7 @@ From top to bottom
 2. only admin account can access this request
 3. even the admin can't delete the admin account
 
-![delete_user_error](/docs/delete_booking_error.jpg)
+![delete_user_error](./docs/delete_booking_error.jpg)
 
 ***
 
@@ -414,7 +414,7 @@ Admin account username: eddyzhou, password: 12345678
 The number(3) in http request is represent the dentist id
 
 
-![delete_dentist](/docs/delete_dentist.jpg)
+![delete_dentist](./docs/delete_dentist.jpg)
 
 ***
 
@@ -428,7 +428,7 @@ Need access token from Dentist Account, login dentist account to get the token
 The first number(5) in http request is represent the booking id, the second number(3) in http request is for treatment id
 
 
-![delete_treatment](/docs/delete_treat.jpg)
+![delete_treatment](./docs/delete_treat.jpg)
 
 Here are some returns should be handled as
 From top to bottom
@@ -438,7 +438,7 @@ From top to bottom
 3. can't find this booking in database
 4. unthenticated dentist account, invalid token
 
-![delete_treat_error](/docs/del_treat_err.jpg)
+![delete_treat_error](./docs/del_treat_err.jpg)
 
 ***
 
@@ -462,7 +462,7 @@ The first number(2) in http request is represent the booking id, the second numb
 You can update either "service" or "fee", or both of them.
 
 
-![update_treatment](/docs/update_treat.jpg)
+![update_treatment](./docs/update_treat.jpg)
 
 Here are some returns should be handled same as dentist delete treatments
 
@@ -484,7 +484,7 @@ Need access token from User Account, login user account to get the token
 The number(2) in http request is represent the booking id
 
 
-![total_amount](/docs/total_amount.jpg)
+![total_amount](./docs/total_amount.jpg)
 
 Here are some other returns should be handled as
 
@@ -500,7 +500,7 @@ Here are some other returns should be handled as
 http://127.0.0.1:5000/dentists/search?speciality=General
 
 
-![search_dentist](/docs/search_dentist.jpg)
+![search_dentist](./docs/search_dentist.jpg)
 
 ***
 
@@ -514,7 +514,7 @@ Admin account username: eddyzhou, password: 12345678
 http://127.0.0.1:5000/auth/bookings/search?status=Open
 
 
-![search_open_booking](/docs/search_open_booking.jpg)
+![search_open_booking](./docs/search_open_booking.jpg)
 
 ***
 
@@ -527,7 +527,7 @@ Need access token from Dentist Account, login Dentist account to get the token
 http://127.0.0.1:5000/dentists/bookings
 
 
-![dentist_bookings](/docs/dentist_bookings.jpg)
+![dentist_bookings](./docs/dentist_bookings.jpg)
 
 ***
 
@@ -535,11 +535,11 @@ http://127.0.0.1:5000/dentists/bookings
 
 The original ERD when submit on the discord
 
-![original](/docs/dental_original.jpg)
+![original](./docs/dental_original.jpg)
 
 After discuss, the final ERD more focus on the core functions
 
-![final](/docs/dental_final.jpg)
+![final](./docs/dental_final.jpg)
 
 
 # R7. Detail any third party services that your app will use
@@ -846,7 +846,7 @@ Cause one treatment must belong to one booking, the foreign key used here is for
 
 # R9. Discuss the database relations to be implemented in your application
 
-![ERD](/docs/dental_final.jpg)
+![ERD](./docs/dental_final.jpg)
 
 Based on the ERD, there will be 4 tables inplemented in this app.
 - Users (Patients/Admin)
@@ -868,7 +868,7 @@ Based on the ERD, there will be 4 tables inplemented in this app.
 
 https://trello.com/b/9H91Pnzz/project-management
 
-![trello](/docs/trello.png)
+![trello](./docs/trello.png)
 
 I use trello as the project management tool, it allows me to organize the tasks and track progress. I devide this project as 4 parts, Project planning(ERD), Model and Schema Creation, Endpoints and documentation, Testing. I set the duo date for each task and remind me when deadlines are approaching. And the checklist in each card helps me to make sure each Endpoints is working properly without errors.
 
