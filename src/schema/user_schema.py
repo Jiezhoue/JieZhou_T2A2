@@ -6,8 +6,6 @@ from marshmallow import fields, validate
 
 # BASIC USER SCHEMAS AREA
 class UserSchema(ma.Schema):
-
-
     class Meta:
         ordered= True
 
@@ -15,7 +13,6 @@ class UserSchema(ma.Schema):
         load_only = ["username", "password", "admin"]
 
     booking = ma.List(ma.Nested("BookingSchema", exclude=("user_id", "user",)))
-
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -37,14 +34,12 @@ class UserRegisterSchema(ma.Schema):
 
     booking = ma.List(ma.Nested("BookingSchema", exclude=("user_id",)))
 
-
 user_register_schema = UserRegisterSchema()
 
 
 
 #This schema is only used when user do the login
 class UserLoginSchema(ma.Schema):
-
 
     username = fields.String(required=True, validate=validate.Length(min=4, error="Username must be at least 4 characters long."))
     password = ma.String(validate=Length(min=8, error="Password must be at least 8 characters long."))

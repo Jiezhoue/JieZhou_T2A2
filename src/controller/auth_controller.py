@@ -23,10 +23,10 @@ def admin_authentication(func):
         user_username = get_jwt_identity()
         user = User.query.filter_by(username=user_username).first()
         if not user:
-            return abort(400, description="Invalid User")
+            return abort(401, description="Invalid User")
     
         if not user.admin:
-            return abort(400, description="You don't have permission to access system")
+            return abort(403, description="You don't have permission to access system")
 
         return func(*args, **kwargs)      
     return wrapper
@@ -39,7 +39,7 @@ def user_authentication(func):
         user_username = get_jwt_identity()
         user = User.query.filter_by(username=user_username).first()
         if not user:
-            return abort(400, description="Invalid User")
+            return abort(401, description="Invalid User")
 
         return func(user, *args, **kwargs)      
     return wrapper
@@ -52,7 +52,7 @@ def dentist_authentication(func):
         dentist_name = get_jwt_identity()
         dentist = Dentist.query.filter_by(username=dentist_name).first()
         if not dentist:
-            return abort(400, description="Invalid dentist account")
+            return abort(401, description="Invalid dentist account")
 
         return func(dentist, *args, **kwargs)      
     return wrapper
@@ -77,7 +77,7 @@ def patient_info(id):
 
     patient = User.query.filter_by(id=id).first()
     if not patient:
-        return abort(401, description="Patient not exist")
+        return abort(404, description="Patient not exist")
     
     result = user_schema.dump(patient)
     return jsonify(result)
@@ -93,7 +93,7 @@ def user_login():
         if not user:
             return abort(401, description="username is not exist")
         elif not bcrypt.check_password_hash(user.password, user_fields["password"]):
-            return abort(401, description="password is not right")
+            return abort(401, description="password is not correct")
         access_token = create_access_token(identity=str(user.username))
         return jsonify({"user": user.username, "token": access_token})
     # return an error if the value fields did't match the user schema requirement
@@ -113,7 +113,7 @@ def signup():
 
         #can't have same username in the system, check the duplication
         if user:
-            return abort(401, description="Username is already registered. Please choose another username.")
+            return abort(409, description="Username is already registered. Please choose another username.")
 
         user = User()
         user.f_name = user_fields["f_name"]
@@ -146,9 +146,9 @@ def delete_user(id):
 
     patient = User.query.filter_by(id=id).first()
     if not patient:
-        return abort(400, description="Can't find that user")
+        return abort(404, description="Can't find that user")
     if patient.admin:
-        return abort(400, description="Can't delelte admin account")
+        return abort(403, description="Can't delelte admin account")
     
     db.session.delete(patient)
     db.session.commit()
@@ -164,7 +164,7 @@ def delete_dentist(id):
   
     dentist = Dentist.query.filter_by(id=id).first()
     if not dentist:
-        return abort(400, description="Can't find that dentist")
+        return abort(404, description="Can't find that dentist")
     
     db.session.delete(dentist)
     db.session.commit()

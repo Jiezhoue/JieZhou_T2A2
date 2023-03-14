@@ -33,7 +33,7 @@ def cancel_booking(user):
    
     booking = Booking.query.filter_by(user_id=user.id, status="Open").first()
     if not booking:
-        return abort(400, description="There is no open booking in the system")
+        return abort(404, description="There is no open booking in the system")
     db.session.delete(booking)
     db.session.commit()
 
@@ -85,9 +85,9 @@ def treatment_fee(user,id):
     #check if the booking exist or not, belongs to this user or not.
     booking = Booking.query.filter_by(id=id).first()
     if not booking:
-        return abort(400, description="Booking is not exist")
+        return abort(404, description="Booking is not exist")
     if booking.user_id != user.id:
-        return abort(400, description="this booking is not yours")
+        return abort(403, description="this booking is not yours")
 
     # use for loop to get all fees under single booking and add them together
     total_amount = 0
