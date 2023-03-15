@@ -15,7 +15,6 @@ from controller.auth_controller import user_authentication
 from controller.auth_controller import dentist_authentication
 from schema.booking_schema import booking_dentist_schema, bookings_dentist_schema
 from controller.user_controller import admin_authentication
-# from schema.dentist_schema import dentist_public_schema, dentists_public_schema
 from marshmallow.exceptions import ValidationError
 
 

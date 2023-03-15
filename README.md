@@ -1,3 +1,104 @@
+# Instruction
+## Option 1. If the file is downloading from Canvas
+
+After download the folder "JieZhou_T2A2", navigate to this folder, run the script in terminal
+1.  Activate the virtual environment 
+    ```
+    source venv/bin/activate
+    ```
+2.  Access PostgreSQL database
+    ```
+    psql
+    ```
+3.  Create Database
+    ```
+    CREATE DATABASE dental_sys_db;
+    ```
+4.  Create admin user
+    ```
+    CREATE USER db_dev WITH PASSWORD '123456';
+    ```
+5.  Grant the permission to this admin user
+    ```
+    GRANT ALL PRIVILEGES ON DATABASE dental_sys_db TO db_dev;
+    ```
+6.  Exit Database
+    ```
+    \q
+    ```
+7.  nagivate to folder "src"
+    ```
+    cd src
+    ```
+8.  Create initial tables in database
+    ```
+    flask db reset
+    ```
+9.  Run the program
+    ```
+    flask run
+    ```
+
+## Option 2. If the file is downloading from Github
+
+If you download from Github https://github.com/Jiezhoue/JieZhou_T2A2
+
+You need to do the following step to run this app
+
+Navigate to this downloaded folder "JieZhou_T2A2" in termimal, run the script in terminal
+1.  Create virtual environment and Activate it
+    ```
+    virtualenv venv
+    source venv/bin/activate
+    ```
+2.  Create .env file
+    ```
+    touch .env
+    ```
+3.  Type 'nano .env' to open '.env' file and copy and paste following lines
+    ```
+    DATABASE_URL="postgresql+psycopg2://db_dev:123456@localhost:5432/dental_sys_db"
+    SECRET_KEY="EDDYZHOU"
+    ```
+    Press Ctrl + X to exit Nano. When prompted to save the changes, type Y and press Enter.
+
+4.  Access PostgreSQL database
+    ```
+    psql
+    ```
+5.  Create Database
+    ```
+    CREATE DATABASE dental_sys_db;
+    ```
+6.  Create admin user
+    ```
+    CREATE USER db_dev WITH PASSWORD '123456';
+    ```
+7.  Grant the permission to this admin user
+    ```
+    GRANT ALL PRIVILEGES ON DATABASE dental_sys_db TO db_dev;
+    ```
+8.  Exit Database
+    ```
+    \q
+    ```
+9.  Instsall all the packages from requirement.txt file
+    ```
+    pip install -r requirements.txt
+    ```
+10. nagivate to folder "src"
+    ```
+    cd src
+    ```
+11. Create initial tables in database
+    ```
+    flask db reset
+    ```
+12. Run the program
+    ```
+    flask run
+    ```
+
 # R1. Identification of the problem you are trying to solve by building this particular app.
 
 The app I built is a dental practice online booking system. I was talking with my friends and some of them are dentists, they said most dental practices in Australia still rely on phone call systems for booking appointments. Cause most of the practice is only 1-3 dentists, implementing an online booking system can require additional investment and staff training. This may not be feasible for smaller dental practices or those with limited resources.
